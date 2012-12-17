@@ -57,6 +57,10 @@ user_id = user_details["id"]
 screen_name = user_details["screen_name"]
 puts "Twitter Archive for " + "@#{screen_name}".light_blue + " (##{user_id}) found"
 
+# find archive details
+archive_details = read_required_twitter_js_file(js_path + "/payload_details.js")
+puts "Found archive payload containing #{archive_details['tweets']} tweets, created at #{archive_details['created_at']}"
+
 # find latest month file (should be last when sorted alphanumerically)
 twitter_js_files = Dir.glob("#{js_path}/tweets/*.js")
 latest_month = read_required_twitter_js_file(twitter_js_files.sort.last)
@@ -69,11 +73,25 @@ last_tweet_date = Date.parse(last_tweet["created_at"])
 puts "Last tweet in archive is\n\t" + display_tweet(last_tweet)
 
 # get response from API
-twitter_url = "http://api.twitter.com/1/statuses/user_timeline.json?count=#{count}&user_id=#{user_id}&since_id=#{last_tweet_id}"
-p twitter_url
-#tweets = JSON.parse(open(twitter_url).read)
+twitter_url = "http://api.twitter.com/1/statuses/user_timeline.json?count=#{count}&user_id=#{user_id}&since_id=#{last_tweet_id}&include_rts=true"
+puts "Making request to #{twitter_url}"
+tweets = JSON.parse(open(twitter_url).read)
 
-#puts "There have been #{tweets.length} tweets since the archive was last updated."
+puts "There have been #{tweets.length} tweets since the archive" + (archive_details.has_key?('updated_at') ? " was last updated on #{archive_details['updated_at']}" : " was created")
+
+# collect tweets by year_month
+collected_months = Hash.new
+tweets.each do |tweet|
+    tweet_date = Date.parse(tweet["created_at"])
+    hash_index = tweet_date.strftime('%Y_%m')
+    if collected_months[hash_index].respond_to? :<<
+        collected_months[hash_index] << tweet
+    else
+        collected_months[hash_index] = [tweet]
+    end
+end
+
+pp collected_months
 
 # add tweets to json data file and csv data file
     # if tweets returned contain new month, create new month files, add file location to tweet_index.js 
