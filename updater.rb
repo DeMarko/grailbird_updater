@@ -84,16 +84,23 @@ collected_months = Hash.new
 tweets.each do |tweet|
     tweet_date = Date.parse(tweet["created_at"])
     hash_index = tweet_date.strftime('%Y_%m')
-    if collected_months[hash_index].respond_to? :<<
-        collected_months[hash_index] << tweet
-    else
-        collected_months[hash_index] = [tweet]
-    end
+    collected_months[hash_index] = Array(collected_months[hash_index])
+    collected_months[hash_index] << tweet
 end
 
-pp collected_months
-
 # add tweets to json data file and csv data file
+collected_months.each do |year_month, month_tweets|
+    month_path = "#{js_path}/tweets/#{year_month}.js"
+
+    existing_month_tweets = (File.exists?(month_path)) ? read_twitter_js_file(month_path) : []
+    all_month_tweets = month_tweets | existing_month_tweets
+    # sort new collection of tweets for this month by reverse date
+    all_month_tweets.sort_by {|t| -Date.parse(t['created_at']).strftime("%s").to_i }
+
+    # overwrite existing file (or create new if doesn't exist)
+end
+
+# JSON.pretty_generate(obj)
     # if tweets returned contain new month, create new month files, add file location to tweet_index.js 
 # add count to tweet_index.js, payload_details.js
 
