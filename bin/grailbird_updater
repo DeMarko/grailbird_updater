@@ -24,6 +24,7 @@ end
 dir = nil
 dir ||= opts[:directory]
 dir ||= ARGV.first
+dir ||= "."
 raise ArgumentError, "Must specify a directory" unless File.directory?(dir)
 raise ArgumentError, "Cannot look back further than 3200 tweets" if opts[:limit] > 3200
 
