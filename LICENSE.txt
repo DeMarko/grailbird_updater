@@ -1,4 +1,4 @@
-Copyright (c) 2012 Steve Klabnik
+Copyright (c) 2012 Dannel Jurado
 
 MIT License
 

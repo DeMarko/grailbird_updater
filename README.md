@@ -1,4 +1,4 @@
-# Grailbird
+# GrailbirdUpdater
 
 For the most of the people who know me online, I've been dying to get a copy of
 my Twitter archive from Twitter for forever. I was finally given one and
@@ -12,7 +12,7 @@ there, do some sorting and update the archive.
 
 Add this line to your application's Gemfile:
 
-    gem 'grailbird'
+    gem 'grailbird_updater'
 
 And then execute:
 
@@ -20,12 +20,12 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install grailbird
+    $ gem install grailbird_updater
 
 ## Usage
 
 ```
-grailbird /path/to/twitter/archive
+grailbird_updater /path/to/twitter/archive
 ```
 
 ## Contributing
