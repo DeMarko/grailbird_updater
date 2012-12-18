@@ -27,7 +27,4 @@ dir ||= ARGV.first
 raise ArgumentError, "Must specify a directory" unless File.directory?(dir)
 raise ArgumentError, "Cannot look back further than 3200 tweets" if opts[:limit] > 3200
 
-count = opts[:limit]
-verbose = opts[:verbose]
-
-GrailbirdUpdater.new(dir).update_tweets
+GrailbirdUpdater.new(dir, opts[:limit], opts[:verbose]).update_tweets

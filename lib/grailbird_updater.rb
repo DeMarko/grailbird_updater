@@ -2,11 +2,14 @@ require "grailbird_updater/version"
 
 class GrailbirdUpdater
 
-  def initialize(dir)
+  def initialize(dir, count, verbose)
     data_path = dir + "/data"
 
     @js_path = data_path + "/js"
     @csv_path = data_path + "/csv"
+
+    @count = count
+    @verbose = verbose
   end
 
   def update_tweets
@@ -14,11 +17,11 @@ class GrailbirdUpdater
     user_details = read_required_twitter_js_file("#{@js_path}/user_details.js")
     user_id = user_details["id"]
     screen_name = user_details["screen_name"]
-    puts "Twitter Archive for " + "@#{screen_name}".light_blue + " (##{user_id}) found" if verbose
+    puts "Twitter Archive for " + "@#{screen_name}".light_blue + " (##{user_id}) found" if @verbose
 
     # find archive details
     archive_details = read_required_twitter_js_file("#{@js_path}/payload_details.js")
-    puts "Found archive payload containing #{archive_details['tweets']} tweets, created at #{archive_details['created_at']}" if verbose
+    puts "Found archive payload containing #{archive_details['tweets']} tweets, created at #{archive_details['created_at']}" if @verbose
 
     # find latest month file (should be last when sorted alphanumerically)
     twitter_js_files = Dir.glob("#{@js_path}/tweets/*.js")
@@ -29,19 +32,19 @@ class GrailbirdUpdater
     last_tweet_id = last_tweet["id_str"]
     last_tweet_date = Date.parse(last_tweet["created_at"])
 
-    puts "Last tweet in archive is\n\t" + display_tweet(last_tweet) if verbose
+    puts "Last tweet in archive is\n\t" + display_tweet(last_tweet) if @verbose
 
     # get response from API
-    twitter_url = "http://api.twitter.com/1/statuses/user_timeline.json?count=#{count}&user_id=#{user_id}&since_id=#{last_tweet_id}&include_rts=true"
-    puts "Making request to #{twitter_url}" if verbose
+    twitter_url = "http://api.twitter.com/1/statuses/user_timeline.json?count=#{@count}&user_id=#{user_id}&since_id=#{last_tweet_id}&include_rts=true"
+    puts "Making request to #{twitter_url}" if @verbose
     tweets = JSON.parse(open(twitter_url).read)
 
-    puts "There have been #{tweets.length} tweets since the archive" + (archive_details.has_key?('updated_at') ? " was last updated on #{archive_details['updated_at']}" : " was created") if verbose
+    puts "There have been #{tweets.length} tweets since the archive" + (archive_details.has_key?('updated_at') ? " was last updated on #{archive_details['updated_at']}" : " was created") if @verbose
 
     # collect tweets by year_month
     collected_months = Hash.new
     tweets.each do |tweet|
-      puts "\t" + display_tweet(tweet) if verbose
+      puts "\t" + display_tweet(tweet) if @verbose
       tweet_date = Date.parse(tweet["created_at"])
       hash_index = tweet_date.strftime('%Y_%m')
       collected_months[hash_index] = Array(collected_months[hash_index])
