@@ -16,3 +16,6 @@ tmp
 .yardoc
 _yardoc
 doc/
+
+# gems need this ignored
+Gemfile.lock
