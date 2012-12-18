@@ -9,7 +9,7 @@ require 'colorize' # if verbose
 require 'grailbird_updater'
 
 opts = Trollop::options do
-    version "updater 0.1"
+    version "updater #{GrailbirdUpdater::VERSION}"
     banner <<-EOS
 Update your Twitter archive (best if used with a cron)
 
