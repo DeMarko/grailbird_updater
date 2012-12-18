@@ -17,11 +17,11 @@ class GrailbirdUpdater
     user_details = read_required_twitter_js_file("#{@js_path}/user_details.js")
     user_id = user_details["id"]
     screen_name = user_details["screen_name"]
-    puts "Twitter Archive for " + "@#{screen_name}".light_blue + " (##{user_id}) found" if @verbose
+    vputs "Twitter Archive for " + "@#{screen_name}".light_blue + " (##{user_id}) found"
 
     # find archive details
     archive_details = read_required_twitter_js_file("#{@js_path}/payload_details.js")
-    puts "Found archive payload containing #{archive_details['tweets']} tweets, created at #{archive_details['created_at']}" if @verbose
+    vputs "Found archive payload containing #{archive_details['tweets']} tweets, created at #{archive_details['created_at']}"
 
     # find latest month file (should be last when sorted alphanumerically)
     twitter_js_files = Dir.glob("#{@js_path}/tweets/*.js")
@@ -32,19 +32,19 @@ class GrailbirdUpdater
     last_tweet_id = last_tweet["id_str"]
     last_tweet_date = Date.parse(last_tweet["created_at"])
 
-    puts "Last tweet in archive is\n\t" + display_tweet(last_tweet) if @verbose
+    vputs "Last tweet in archive is\n\t" + display_tweet(last_tweet)
 
     # get response from API
     twitter_url = "http://api.twitter.com/1/statuses/user_timeline.json?count=#{@count}&user_id=#{user_id}&since_id=#{last_tweet_id}&include_rts=true"
-    puts "Making request to #{twitter_url}" if @verbose
+    vputs "Making request to #{twitter_url}"
     tweets = JSON.parse(open(twitter_url).read)
 
-    puts "There have been #{tweets.length} tweets since the archive" + (archive_details.has_key?('updated_at') ? " was last updated on #{archive_details['updated_at']}" : " was created") if @verbose
+    vputs "There have been #{tweets.length} tweets since the archive" + (archive_details.has_key?('updated_at') ? " was last updated on #{archive_details['updated_at']}" : " was created")
 
     # collect tweets by year_month
     collected_months = Hash.new
     tweets.each do |tweet|
-      puts "\t" + display_tweet(tweet) if @verbose
+      vputs "\t" + display_tweet(tweet)
       tweet_date = Date.parse(tweet["created_at"])
       hash_index = tweet_date.strftime('%Y_%m')
       collected_months[hash_index] = Array(collected_months[hash_index])
@@ -119,6 +119,13 @@ class GrailbirdUpdater
   def write_twitter_js_to_path_with_heading(contents, path, heading)
     json_pretty_contents = JSON.pretty_generate(contents)
     File.open(path, 'w') {|f| f.write("#{heading} = #{json_pretty_contents}")}
+  end
+
+  private
+
+  # only puts if we're verbose
+  def vputs(str)
+    puts str if @verbose
   end
 end
 
