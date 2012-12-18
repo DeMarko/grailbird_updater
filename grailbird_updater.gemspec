@@ -1,11 +1,11 @@
 # -*- encoding: utf-8 -*-
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'grailbird/version'
+require 'grailbird_updater/version'
 
 Gem::Specification.new do |gem|
-  gem.name          = "grailbird"
-  gem.version       = Grailbird::VERSION
+  gem.name          = "grailbird_updater"
+  gem.version       = GrailbirdUpdater::VERSION
   gem.authors       = ["Dannel Jurado"]
   gem.email         = ["dannelj@gmail.com"]
   gem.description   = %q{Twitter now allows you to download your tweets. This tool lets you keep that archive up to date.}
