@@ -6,11 +6,11 @@ require 'grailbird/version'
 Gem::Specification.new do |gem|
   gem.name          = "grailbird"
   gem.version       = Grailbird::VERSION
-  gem.authors       = ["Steve Klabnik"]
-  gem.email         = ["steve@steveklabnik.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
-  gem.homepage      = ""
+  gem.authors       = ["Dannel Jurado"]
+  gem.email         = ["dannelj@gmail.com"]
+  gem.description   = %q{Twitter now allows you to download your tweets. This tool lets you keep that archive up to date.}
+  gem.summary       = %q{A way to keep an updated archive of Twitter tweets.}
+  gem.homepage      = "https://github.com/DeMarko/grailbird_updater"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
