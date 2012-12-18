@@ -40,26 +40,26 @@ class GrailbirdUpdater
     # collect tweets by year_month
     collected_months = Hash.new
     tweets.each do |tweet|
-        puts "\t" + display_tweet(tweet) if verbose
-        tweet_date = Date.parse(tweet["created_at"])
-        hash_index = tweet_date.strftime('%Y_%m')
-        collected_months[hash_index] = Array(collected_months[hash_index])
-        collected_months[hash_index] << tweet
+      puts "\t" + display_tweet(tweet) if verbose
+      tweet_date = Date.parse(tweet["created_at"])
+      hash_index = tweet_date.strftime('%Y_%m')
+      collected_months[hash_index] = Array(collected_months[hash_index])
+      collected_months[hash_index] << tweet
     end
 
     # add tweets to json data file and csv data file
     tweet_index = read_required_twitter_js_file("#{@js_path}/tweet_index.js")
     collected_months.each do |year_month, month_tweets|
-        month_path = "#{@js_path}/tweets/#{year_month}.js"
+      month_path = "#{@js_path}/tweets/#{year_month}.js"
 
-        existing_month_tweets = (File.exists?(month_path)) ? read_twitter_js_file(month_path) : []
-        all_month_tweets = month_tweets | existing_month_tweets
-        # sort new collection of tweets for this month by reverse date
-        all_month_tweets.sort_by {|t| -Date.parse(t['created_at']).strftime("%s").to_i }
+      existing_month_tweets = (File.exists?(month_path)) ? read_twitter_js_file(month_path) : []
+      all_month_tweets = month_tweets | existing_month_tweets
+      # sort new collection of tweets for this month by reverse date
+      all_month_tweets.sort_by {|t| -Date.parse(t['created_at']).strftime("%s").to_i }
 
-        # overwrite existing file (or create new if doesn't exist)
-        write_twitter_js_to_path_with_heading(all_month_tweets, "#{@js_path}/tweets/#{year_month}.js", "Grailbird.data.tweets_#{year_month}")
-        tweet_index = update_tweet_index(tweet_index, year_month, month_tweets.length)
+      # overwrite existing file (or create new if doesn't exist)
+      write_twitter_js_to_path_with_heading(all_month_tweets, "#{@js_path}/tweets/#{year_month}.js", "Grailbird.data.tweets_#{year_month}")
+      tweet_index = update_tweet_index(tweet_index, year_month, month_tweets.length)
     end
 
     # write new tweet_index.js once
@@ -72,49 +72,49 @@ class GrailbirdUpdater
   end
 
   def read_required_twitter_js_file(file_path)
-      raise "#{file_path} must exist" unless  File.exists?(file_path)
-      read_twitter_js_file(file_path)
+    raise "#{file_path} must exist" unless  File.exists?(file_path)
+    read_twitter_js_file(file_path)
   end
 
   def read_twitter_js_file(file_path)
-      file_contents = open(file_path).read.split("\n").join(" ")
-      json_file_contents = file_contents.gsub(/^((var)?\s*(.+?)\s+=\s+)/m, '')
-      json = JSON.parse(json_file_contents)
+    file_contents = open(file_path).read.split("\n").join(" ")
+    json_file_contents = file_contents.gsub(/^((var)?\s*(.+?)\s+=\s+)/m, '')
+    json = JSON.parse(json_file_contents)
   end
 
   def display_tweet(tweet)
-      if tweet['entities'] && tweet['entities']['urls']
-          tweet['entities']['urls'].each { |url_entity|
-              tweet['text'] = tweet['text'].gsub("#{url_entity['url']}", "#{url_entity['expanded_url']}")
-          }
-      end
-      tweet = "@#{tweet['user']['screen_name']}".blue + ": \"#{tweet['text']}\"\n"
+    if tweet['entities'] && tweet['entities']['urls']
+      tweet['entities']['urls'].each { |url_entity|
+        tweet['text'] = tweet['text'].gsub("#{url_entity['url']}", "#{url_entity['expanded_url']}")
+      }
+    end
+    tweet = "@#{tweet['user']['screen_name']}".blue + ": \"#{tweet['text']}\"\n"
   end
 
   def update_tweet_index(tweet_index, year_month, count)
-      year, month = year_month.split('_')
-      year = year.to_i
-      month = month.to_i
-      tweet_index.each do |index_month|
-          if index_month['year'] == year && index_month['month'] == month
-              index_month['tweet_count'] += count
-              return tweet_index
-          end
+    year, month = year_month.split('_')
+    year = year.to_i
+    month = month.to_i
+    tweet_index.each do |index_month|
+      if index_month['year'] == year && index_month['month'] == month
+        index_month['tweet_count'] += count
+        return tweet_index
       end
+    end
 
-      new_month = {"file_name" => "data/js/tweets/#{year_month}.js",
-                   "year" => year,
-                   "var_name" => "tweets_#{year_month}",
-                   "tweet_count" => count,
-                   "month" => month
-                  }
-      new_index = tweet_index.unshift(new_month).sort_by {|m| [-m['year'], -m['month']]}
+    new_month = {"file_name" => "data/js/tweets/#{year_month}.js",
+      "year" => year,
+        "var_name" => "tweets_#{year_month}",
+        "tweet_count" => count,
+        "month" => month
+    }
+    new_index = tweet_index.unshift(new_month).sort_by {|m| [-m['year'], -m['month']]}
 
   end
 
   def write_twitter_js_to_path_with_heading(contents, path, heading)
-      json_pretty_contents = JSON.pretty_generate(contents)
-      File.open(path, 'w') {|f| f.write("#{heading} = #{json_pretty_contents}")}
+    json_pretty_contents = JSON.pretty_generate(contents)
+    File.open(path, 'w') {|f| f.write("#{heading} = #{json_pretty_contents}")}
   end
 end
 
