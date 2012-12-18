@@ -30,8 +30,4 @@ raise ArgumentError, "Cannot look back further than 3200 tweets" if opts[:limit]
 count = opts[:limit]
 verbose = opts[:verbose]
 
-data_path = dir + "/data"
-js_path = data_path + "/js"
-csv_path = data_path + "/csv"
-
-GrailbirdUpdater.new(data_path, js_path, csv_path).update_tweets
+GrailbirdUpdater.new(dir).update_tweets

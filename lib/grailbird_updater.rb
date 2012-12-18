@@ -2,10 +2,11 @@ require "grailbird_updater/version"
 
 class GrailbirdUpdater
 
-  def initialize(data_path, js_path, csv_path)
-    @data_path = data_path
-    @js_path = js_path
-    @csv_path = csv_path
+  def initialize(dir)
+    data_path = dir + "/data"
+
+    @js_path = data_path + "/js"
+    @csv_path = data_path + "/csv"
   end
 
   def update_tweets
