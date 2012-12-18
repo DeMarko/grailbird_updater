@@ -51,14 +51,41 @@ def display_tweet(tweet)
     tweet = "@#{tweet['user']['screen_name']}".blue + ": \"#{tweet['text']}\"\n"
 end
 
+def update_tweet_index(tweet_index, year_month, count)
+    year, month = year_month.split('_')
+    year = year.to_i
+    month = month.to_i
+    tweet_index.each do |index_month|
+        if index_month['year'] == year && index_month['month'] == month
+            index_month['tweet_count'] += count
+            return tweet_index
+        end
+    end
+
+    new_month = {"file_name" => "data/js/tweets/#{year_month}.js",
+                 "year" => year,
+                 "var_name" => "tweets_#{year_month}",
+                 "tweet_count" => count,
+                 "month" => month
+                }
+    new_index = tweet_index.unshift(new_month).sort_by {|m| [-m['year'], -m['month']]}
+
+end
+
+def write_twitter_js_to_path_with_heading(contents, path, heading)
+    json_pretty_contents = JSON.pretty_generate(contents)
+    File.open(path, 'w') {|f| f.write("#{heading} = #{json_pretty_contents}")}
+end
+
+
 # find user_id in data/js/user_details.js
-user_details = read_required_twitter_js_file(js_path + "/user_details.js")
+user_details = read_required_twitter_js_file("#{js_path}/user_details.js")
 user_id = user_details["id"]
 screen_name = user_details["screen_name"]
 puts "Twitter Archive for " + "@#{screen_name}".light_blue + " (##{user_id}) found"
 
 # find archive details
-archive_details = read_required_twitter_js_file(js_path + "/payload_details.js")
+archive_details = read_required_twitter_js_file("#{js_path}/payload_details.js")
 puts "Found archive payload containing #{archive_details['tweets']} tweets, created at #{archive_details['created_at']}"
 
 # find latest month file (should be last when sorted alphanumerically)
@@ -89,6 +116,7 @@ tweets.each do |tweet|
 end
 
 # add tweets to json data file and csv data file
+tweet_index = read_required_twitter_js_file("#{js_path}/tweet_index.js")
 collected_months.each do |year_month, month_tweets|
     month_path = "#{js_path}/tweets/#{year_month}.js"
 
@@ -98,9 +126,14 @@ collected_months.each do |year_month, month_tweets|
     all_month_tweets.sort_by {|t| -Date.parse(t['created_at']).strftime("%s").to_i }
 
     # overwrite existing file (or create new if doesn't exist)
+    write_twitter_js_to_path_with_heading(all_month_tweets, "#{js_path}/tweets/#{year_month}.js", "Grailbird.data.tweets_#{year_month}")
+    tweet_index = update_tweet_index(tweet_index, year_month, month_tweets.length)
 end
 
-# JSON.pretty_generate(obj)
-    # if tweets returned contain new month, create new month files, add file location to tweet_index.js 
-# add count to tweet_index.js, payload_details.js
+# write new tweet_index.js once
+write_twitter_js_to_path_with_heading(tweet_index, "#{js_path}/tweet_index.js", "var tweet_index")
 
+# add count to payload_details.js
+archive_details['tweets'] += tweets.length
+archive_details['updated_at'] = Time.now.getgm.strftime("%a %b %d %T %z %Y")
+write_twitter_js_to_path_with_heading(archive_details, "#{js_path}/payload_details.js", "var payload_details")
