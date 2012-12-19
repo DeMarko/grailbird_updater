@@ -17,6 +17,7 @@ Usage: updater [options] [path to archive]
 
 EOS
     opt :verbose, "Verbose mode"
+    opt :prune, "Prune all but necessary user data from tweets", :default => true
     opt :limit, "How many tweets to look back at (max: 3200)", :default => 1000
     opt :directory, "Twitter archive directory", :type => :string
 end
@@ -28,4 +29,4 @@ dir ||= "."
 raise ArgumentError, "Must specify a directory" unless File.directory?(dir)
 raise ArgumentError, "Cannot look back further than 3200 tweets" if opts[:limit] > 3200
 
-GrailbirdUpdater.new(dir, opts[:limit], opts[:verbose]).update_tweets
+GrailbirdUpdater.new(dir, opts[:limit], opts[:verbose], opts[:prune]).update_tweets

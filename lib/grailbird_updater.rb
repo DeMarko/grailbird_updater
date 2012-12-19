@@ -2,7 +2,9 @@ require "grailbird_updater/version"
 
 class GrailbirdUpdater
 
-  def initialize(dir, count, verbose)
+  KEEP_FIELDS = {'user' => ['name', 'screen_name', 'protected', 'id_str', 'profile_image_url_https', 'id', 'verified']}
+
+  def initialize(dir, count, verbose, prune)
     data_path = dir + "/data"
 
     @js_path = data_path + "/js"
@@ -10,6 +12,7 @@ class GrailbirdUpdater
 
     @count = count
     @verbose = verbose
+    @prune = prune
   end
 
   def update_tweets
@@ -44,6 +47,7 @@ class GrailbirdUpdater
     # collect tweets by year_month
     collected_months = Hash.new
     tweets.each do |tweet|
+      tweet = prune_tweet(tweet) if @prune
       vputs "\t" + display_tweet(tweet)
       tweet_date = Date.parse(tweet["created_at"])
       hash_index = tweet_date.strftime('%Y_%m')
@@ -86,8 +90,15 @@ class GrailbirdUpdater
     json = JSON.parse(json_file_contents)
   end
 
+  def prune_tweet(tweet)
+    KEEP_FIELDS.each do |parent_field, field_names|
+      tweet[parent_field].delete_if { |key, value| !field_names.include?(key) }
+    end
+    return tweet
+  end
+
   def display_tweet(tweet)
-    tweet_text = String.new
+    tweet_text = tweet['text']
     if tweet['entities'] && tweet['entities']['urls']
       tweet['entities']['urls'].each { |url_entity|
         tweet_text = tweet['text'].gsub("#{url_entity['url']}", "#{url_entity['expanded_url']}")
@@ -114,7 +125,6 @@ class GrailbirdUpdater
         "month" => month
     }
     new_index = tweet_index.unshift(new_month).sort_by {|m| [-m['year'], -m['month']]}
-
   end
 
   def write_twitter_js_to_path_with_heading(contents, path, heading)
