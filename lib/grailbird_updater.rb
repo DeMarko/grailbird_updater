@@ -35,7 +35,7 @@ class GrailbirdUpdater
     vputs "Last tweet in archive is\n\t" + display_tweet(last_tweet)
 
     # get response from API
-    twitter_url = "http://api.twitter.com/1/statuses/user_timeline.json?count=#{@count}&user_id=#{user_id}&since_id=#{last_tweet_id}&include_rts=true"
+    twitter_url = "http://api.twitter.com/1/statuses/user_timeline.json?count=#{@count}&user_id=#{user_id}&since_id=#{last_tweet_id}&include_rts=true&include_entities=true"
     vputs "Making request to #{twitter_url}"
     tweets = JSON.parse(open(twitter_url).read)
 
@@ -51,7 +51,7 @@ class GrailbirdUpdater
       collected_months[hash_index] << tweet
     end
 
-    # add tweets to json data file and csv data file
+    # add tweets to json data file
     tweet_index = read_required_twitter_js_file("#{@js_path}/tweet_index.js")
     collected_months.each do |year_month, month_tweets|
       month_path = "#{@js_path}/tweets/#{year_month}.js"
@@ -81,18 +81,19 @@ class GrailbirdUpdater
   end
 
   def read_twitter_js_file(file_path)
-    file_contents = open(file_path).read.split("\n").join(" ")
+    file_contents = open(file_path).read.force_encoding("UTF-8").split("\n").join(" ")
     json_file_contents = file_contents.gsub(/^((var)?\s*(.+?)\s+=\s+)/m, '')
     json = JSON.parse(json_file_contents)
   end
 
   def display_tweet(tweet)
+    tweet_text = String.new
     if tweet['entities'] && tweet['entities']['urls']
       tweet['entities']['urls'].each { |url_entity|
-        tweet['text'] = tweet['text'].gsub("#{url_entity['url']}", "#{url_entity['expanded_url']}")
+        tweet_text = tweet['text'].gsub("#{url_entity['url']}", "#{url_entity['expanded_url']}")
       }
     end
-    tweet = "@#{tweet['user']['screen_name']}".blue + ": \"#{tweet['text']}\"\n"
+    tweet = "@#{tweet['user']['screen_name']}".blue + ": \"#{tweet_text}\"\n"
   end
 
   def update_tweet_index(tweet_index, year_month, count)
