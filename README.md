@@ -8,6 +8,9 @@ Turns out the contents in the archive are partial/trimmed API responses from
 the Twitter API, so it is actually possible to drop a whole API response in
 there, do some sorting and update the archive.
 
+This currently does not work with a private/protected Twitter account, see 
+[this issue](https://github.com/DeMarko/grailbird_updater/issues/6)
+
 ## How do I know if I have a Twitter archive?
 
 Hopefully, you downloaded it from Twitter once the feature was made available
@@ -50,7 +53,10 @@ tweets
 ```
 
 This gem only modifies what's in the data directory for a given archive, 
-the rest of the files are provided by Twitter
+the rest of the files are provided by Twitter. To check if you can download
+a copy of your Twitter archive, go to your [Account Settings](https://twitter.com/settings/account)
+and scroll all the way to the bottom. If the feature is enabled for you, you should 
+see a section labeled "Your Twitter Archive".
 
 ## Installation
 
