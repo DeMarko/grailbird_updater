@@ -98,19 +98,24 @@ class GrailbirdUpdater
       :include_entities => true}
     twitter_uri.query = URI.encode_www_form(params)
 
-    vputs "Making request to #{twitter_uri}"
+    vputs "\nMaking request to #{twitter_uri}"
     response = Net::HTTP.get_response(twitter_uri)
 
     if response.is_a?(Net::HTTPUnauthorized)
       access_token = do_oauth_dance(screen_name)
       response = access_token.request(:get, twitter_uri.to_s)
+      if response.is_a?(Net::HTTPUnauthorized)
+        puts "\nSomething went wrong trying to authorize grailbird_updater with the account: " + "@#{screen_name}".blue
+        puts "Please delete #{@base_dir}/#{screen_name}_keys.yaml and follow the authorize steps again."
+        exit
+      end
     end
 
     return response.body
   end
 
   def do_oauth_dance(screen_name)
-    puts "It seems " + "@#{screen_name}".blue + " has a protected account."
+    puts "\nIt seems " + "@#{screen_name}".blue + " has a protected account."
     key_file_path = "#{@base_dir}/#{screen_name}_keys.yaml"
     if File.exists?(key_file_path)
         keys = YAML.load_file(key_file_path)
@@ -120,23 +125,23 @@ class GrailbirdUpdater
         token_secret = keys['secret']
     else
       puts <<-EOS
-          To be able to retrieve your protected tweets, you will need a consumer key/secret
+      To be able to retrieve your protected tweets, you will need a consumer key/secret
 
-          Please follow these steps to authorize grailbird_updater to download tweets:
-              1. Go to https://dev.twitter.com/apps/new
-              2. Give it a name (I recommend #{screen_name}_grailbird), description and URL
-              3. Create application
-              4. Go to your application page, you should see a "Consumer key" and a "Consumer secret"
+      Please follow these steps to authorize grailbird_updater to download tweets:
+          1. Go to https://dev.twitter.com/apps/new
+          2. Give it a name (I recommend #{screen_name}_grailbird), description and URL
+          3. Create application
+          4. Go to your application page, you should see a "Consumer key" and a "Consumer secret"
 
-          Note: you will only need to create this application once!
+      Note: you will only need to create this application once!
 
-          So you don't have to enter these again, we'll save a copy of your keys in a file called #{screen_name}_keys.yaml
+      So you don't have to enter these again, we'll save a copy of your keys in a file called #{screen_name}_keys.yaml
 
-          IMPORTANT: Do NOT store the folder of your tweets on a public server. If someone gets access to #{screen_name}_keys.yaml they can access your entire account!
-          Did I mention that was IMPORTANT? BECAUSE IT IS.
+      #{"IMPORTANT".red.blink} Do NOT store the folder of your tweets on a public server. 
+                If someone gets access to #{screen_name}_keys.yaml they can access your entire account!
       EOS
 
-      puts "Enter your 'Consumer key'"
+      puts "\nEnter your 'Consumer key'"
       consumer_key = STDIN.gets.chomp
       puts "Enter your 'Consumer secret'"
       consumer_secret = STDIN.gets.chomp
@@ -149,7 +154,7 @@ class GrailbirdUpdater
           :authorize_path => '/oauth/authorize' }
       )
       request_token = consumer.get_request_token
-      puts "Go to this URL: #{request_token.authorize_url()}"
+      puts "\nGo to this URL: #{request_token.authorize_url()}"
       puts "Authorize the application and you will receive a PIN"
       puts "Enter the PIN here:"
       pin = STDIN.gets.chomp
