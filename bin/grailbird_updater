@@ -1,9 +1,11 @@
 #!/usr/bin/env ruby
 
-require 'open-uri'
+require 'uri'
+require 'net/http'
 require 'json'
-require 'trollop'
+require 'oauth'
 require 'pp'
+require 'trollop'
 require 'colorize' # if verbose
 
 require 'grailbird_updater'
