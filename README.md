@@ -8,14 +8,72 @@ Turns out the contents in the archive are partial/trimmed API responses from
 the Twitter API, so it is actually possible to drop a whole API response in
 there, do some sorting and update the archive.
 
-This currently does not work with a private/protected Twitter account, see 
-[this issue](https://github.com/DeMarko/grailbird_updater/issues/6)
 
-## How do I know if I have a Twitter archive?
+## Installation
 
-Hopefully, you downloaded it from Twitter once the feature was made available
-to you and have their web application which can consume it. The file structure
-looks somewhat like this (as of 19.12.12):
+Install it yourself as:
+
+    $ gem install grailbird_updater
+
+Or add this line to your application's Gemfile:
+
+    gem 'grailbird_updater'
+
+And then execute:
+
+    $ bundle
+
+## Usage
+
+```
+grailbird_updater /path/to/twitter/archive
+```
+
+## Contributing
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
+
+## FAQ
+
+* _I have a protected Twitter account, can I still use this updater with my Twitter archive?_
+
+    Actually, yes! However, you will need to create your own "application" on
+    Twitter and then use your own consumer key/secret pair to let the application
+    use the oauth tokens for a user and then follow the authorization steps for
+    a given protected user.
+
+    Once you have auth'd the application for a protected user, you do not have to do
+    it again, the consumer key/secret and oauth token/secret are stored in a YAML file
+    at the root of your tweet archive.
+
+    __IMPORTANT__ Do NOT commit or post your own consumer key/secret or your oauth
+    token/secret anywhere.
+
+    Note: you will only need to create a single application on Twitter even if you
+    are using this to update multiple protected account. You can reuse the consumer
+    key/secret and just authorize each account individually.
+
+    Please see [this wiki article](https://github.com/DeMarko/grailbird_updater/wiki/Authorizing-grailbird_updater-to-work-with-Protected-Twitter-accounts) for step-by-step instructions.
+
+* _How do I know if I have a Twitter archive?_
+
+    Hopefully, you downloaded it from Twitter once the feature was made available
+    to you and have their web application which can consume it.
+
+    This gem only modifies what's in the `data` directory for a given archive,
+    the rest of the files are provided by Twitter.
+
+    To check if you can download a copy of your Twitter archive, go to your
+    [Account Settings](https://twitter.com/settings/account) and scroll all
+    the way to the bottom. If the feature is enabled for you, you should see
+    a section labeled "Your Twitter Archive".
+
+    The file structure looks somewhat like this (as of 19.12.12):
+
 
 ```
 tweets
@@ -52,36 +110,3 @@ tweets
     └─ ... // provided by Twitter
 ```
 
-This gem only modifies what's in the data directory for a given archive, 
-the rest of the files are provided by Twitter. To check if you can download
-a copy of your Twitter archive, go to your [Account Settings](https://twitter.com/settings/account)
-and scroll all the way to the bottom. If the feature is enabled for you, you should 
-see a section labeled "Your Twitter Archive".
-
-## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'grailbird_updater'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install grailbird_updater
-
-## Usage
-
-```
-grailbird_updater /path/to/twitter/archive
-```
-
-## Contributing
-
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
