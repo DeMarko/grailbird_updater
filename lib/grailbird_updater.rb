@@ -5,22 +5,33 @@ class GrailbirdUpdater
   KEEP_FIELDS = {'user' => ['name', 'screen_name', 'protected', 'id_str', 'profile_image_url_https', 'id', 'verified']}
 
   class JsFile
-    def self.read_required(file_path)
-      raise "#{file_path} must exist" unless File.exists?(file_path)
-      read(file_path)
-    end
-
+    # Read UTF-8 file and return hash of contents (files being read contain JS arrays)
+    #
+    # @param file_path [String] path to file being read
     def self.read(file_path)
       file_contents = open(file_path).read.force_encoding("UTF-8").split("\n").join(" ")
       json_file_contents = file_contents.gsub(/^((var)?\s*(.+?)\s+=\s+)/m, '')
       return JSON.parse(json_file_contents)
     end
 
-    def self.write_with_heading(contents, path, heading)
-      json_pretty_contents = JSON.pretty_generate(contents)
-      File.open(path, 'w') {|f| f.write("#{heading} = #{json_pretty_contents}")}
+    # Checks if file being read exists, stops everything if it doesn't
+    #
+    # @param file_path [String] path to file being read
+    # @raise [IOError] if the required file isn't found
+    def self.read_required(file_path)
+      raise IOError "#{file_path} must exist" unless File.exists?(file_path)
+      read(file_path)
     end
 
+    # Write files Twitter's Archive app likes with specific headings
+    #
+    # @param contents [Object] object whose contents are to be written to the file
+    # @param file_path [String] path to file being written
+    # @param heading [String] heading for file, usually "var Something"
+    def self.write_with_heading(contents, file_path, heading)
+      json_pretty_contents = JSON.pretty_generate(contents)
+      File.open(file_path, 'w') {|f| f.write("#{heading} = #{json_pretty_contents}")}
+    end
   end
 
   def initialize(dir, count, verbose, prune)
@@ -52,7 +63,6 @@ class GrailbirdUpdater
     # find last_tweet_id in latest_month (should be first, because Twitter)
     last_tweet = latest_month.first
     last_tweet_id = last_tweet["id_str"]
-    last_tweet_date = Date.parse(last_tweet["created_at"])
 
     vputs "Last tweet in archive is\n\t" + display_tweet(last_tweet)
 
