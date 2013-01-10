@@ -3,6 +3,7 @@ require "grailbird_updater/version"
 class GrailbirdUpdater
 
   KEEP_FIELDS = {'user' => ['name', 'screen_name', 'protected', 'id_str', 'profile_image_url_https', 'id', 'verified']}
+  MAX_REQUEST_SIZE = 200
 
   class JsFile
     # Read UTF-8 file and return hash of contents (files being read contain JS arrays)
@@ -34,15 +35,15 @@ class GrailbirdUpdater
     end
   end
 
-  def initialize(dir, count, verbose, prune)
+  def initialize(dir, verbose, prune)
     @base_dir = dir
     data_path = dir + "/data"
     @js_path = data_path + "/js"
     @csv_path = data_path + "/csv"
 
-    @count = count
     @verbose = verbose
     @prune = prune
+    @access_token = nil
   end
 
   def update_tweets
@@ -66,7 +67,7 @@ class GrailbirdUpdater
 
     vputs "Last tweet in archive is\n\t" + display_tweet(last_tweet)
 
-    tweets = JSON.parse(get_twitter_user_timeline_response(screen_name, user_id, last_tweet_id, @count))
+    tweets = get_twitter_user_timeline_response(screen_name, user_id, last_tweet_id)
 
     vputs "There have been #{tweets.length} tweets since the archive" + (archive_details.has_key?('updated_at') ? " was last updated on #{archive_details['updated_at']}" : " was created")
 
@@ -105,31 +106,58 @@ class GrailbirdUpdater
     GrailbirdUpdater::JsFile.write_with_heading(archive_details, "#{@js_path}/payload_details.js", "var payload_details")
   end
 
-  def get_twitter_user_timeline_response(screen_name, user_id, last_tweet_id, count)
+  def get_twitter_user_timeline_response(screen_name, user_id, last_tweet_id)
     twitter_url = "http://api.twitter.com/1/statuses/user_timeline.json"
     twitter_uri = URI(twitter_url)
+
     params = {
-      :count => count,
+      :count => MAX_REQUEST_SIZE,
       :user_id => user_id,
       :since_id => last_tweet_id,
       :include_rts => true,
       :include_entities => true}
     twitter_uri.query = URI.encode_www_form(params)
 
-    vputs "\nMaking request to #{twitter_uri}\n"
-    response = Net::HTTP.get_response(twitter_uri)
+    response = make_twitter_request(twitter_uri, screen_name)
 
-    if response.is_a?(Net::HTTPUnauthorized)
-      access_token = do_oauth_dance(screen_name)
-      response = access_token.request(:get, twitter_uri.to_s)
+    response_tweets = JSON.parse(response.body)
+
+    total_tweets = Array.new
+
+    while response_tweets.length > 0
+      total_tweets += response_tweets
+      last_tweet_returned = response_tweets.last
+      params[:max_id] = last_tweet_returned['id'] - 1 # this way the response doesn't include the last tweet from the previous one
+      twitter_uri.query = URI.encode_www_form(params)
+
+      response = make_twitter_request(twitter_uri, screen_name)
+      response_tweets = JSON.parse(response.body)
+    end
+
+    return total_tweets
+  end
+
+  def make_twitter_request(twitter_uri, screen_name)
+    vputs "\nMaking request to #{twitter_uri}\n"
+
+    if !@access_token.nil?
+      response = @access_token.request(:get, twitter_uri.to_s)
+    else
+      response = Net::HTTP.get_response(twitter_uri)
+
       if response.is_a?(Net::HTTPUnauthorized)
-        puts "\nSomething went wrong trying to authorize grailbird_updater with the account: " + "@#{screen_name}".blue
-        puts "Please delete #{@base_dir}/#{screen_name}_keys.yaml and follow the authorize steps again."
-        exit
+        @access_token = do_oauth_dance(screen_name)
+        response = @access_token.request(:get, twitter_uri.to_s)
       end
     end
 
-    return response.body
+    if response.is_a?(Net::HTTPUnauthorized)
+      puts "\nSomething went wrong trying to authorize grailbird_updater with the account: " + "@#{screen_name}".blue
+      puts "Please delete #{@base_dir}/#{screen_name}_keys.yaml and follow the authorize steps again."
+      exit
+    end
+
+    return response
   end
 
   def do_oauth_dance(screen_name)
