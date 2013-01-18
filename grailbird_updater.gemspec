@@ -20,4 +20,5 @@ Gem::Specification.new do |gem|
   gem.add_dependency "oauth"
   gem.add_dependency "trollop"
   gem.add_dependency "colorize"
+  gem.add_dependency "minitest"
 end
