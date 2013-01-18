@@ -20,7 +20,7 @@ class GrailbirdUpdater
     # @param file_path [String] path to file being read
     # @raise [IOError] if the required file isn't found
     def self.read_required(file_path)
-      raise IOError "#{file_path} must exist" unless File.exists?(file_path)
+      raise IOError, "#{file_path} must exist" unless File.exists?(file_path)
       read(file_path)
     end
 
