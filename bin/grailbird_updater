@@ -22,7 +22,7 @@ EOS
 
     opt :verbose, "Verbose mode"
     opt :prune, "Prune all but necessary user data from tweets", :default => true
-    opt :csv_write, "Also write to CSV files in archive", :default => false
+    opt :csv_write, "Also write to CSV files in archive"
     opt :directory, "Twitter archive directory", :type => :string
     opt :key_path, "Alternate path to directory containing a YAML file with the app/user keys for the archive's account. Defaults to the archive directory", :type => :string
 end
