@@ -4,6 +4,7 @@ class GrailbirdUpdater
 
   KEEP_FIELDS = {'user' => ['name', 'screen_name', 'protected', 'id_str', 'profile_image_url_https', 'id', 'verified']}
   MAX_REQUEST_SIZE = 200
+  PLATFORM_IS_OSX = (Object::RUBY_PLATFORM =~ /darwin/i) ? true : false
 
   class JsFile
     # Read UTF-8 file and return hash of contents (files being read contain JS arrays)
@@ -175,6 +176,7 @@ Please follow these steps to authorize grailbird_updater to download tweets:
     2. Give it a name (I recommend #{screen_name}_grailbird), description and URL
     3. Create application
     4. Go to your application page, you should see a "Consumer key" and a "Consumer secret"
+    5. Enter these here when prompted, go to the URL provided then enter the PIN you receive
 
 #{"Note".underline}: you will only need to create this application once!
 
@@ -205,6 +207,12 @@ EOS
       authorize_url = request_token.authorize_url()
       puts "\nGo to this URL: #{authorize_url}"
       puts "Authorize the application and you will receive a PIN"
+      # open default browser if on OS X
+      if PLATFORM_IS_OSX
+        sleep(2)
+        `open "#{authorize_url}"`
+      end
+
       print_flush "Enter the PIN here: "
       pin = STDIN.gets.chomp
       access_token = request_token.get_access_token(:oauth_verifier => pin)
@@ -229,7 +237,7 @@ EOS
         :scheme => :header
       })
     # now create the access token object from passed values
-    token_hash = { :oauth_token => oauth_token,
+    token_hash = {:oauth_token => oauth_token,
                   :oauth_token_secret => oauth_token_secret
                 }
     access_token = OAuth::AccessToken.from_hash(consumer, token_hash )
