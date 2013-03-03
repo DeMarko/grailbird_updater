@@ -260,6 +260,7 @@ EOS
                        tweet["in_reply_to_status_id"],
                        tweet["in_reply_to_user_id"],
                        tweet.has_key?("retweeted_status") ? tweet["retweeted_status"]["id"] : '',
+                       tweet.has_key?("retweeted_status") ? tweet["retweeted_status"]["user"]["id"] : '',
                        tweet["created_at"],
                        tweet["source"],
                        tweet["text"]];
