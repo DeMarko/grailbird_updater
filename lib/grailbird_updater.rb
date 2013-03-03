@@ -36,13 +36,14 @@ class GrailbirdUpdater
     end
   end
 
-  def initialize(dir, verbose, prune, key_dir)
+  def initialize(dir, verbose, prune, key_dir, write_csv)
     @base_dir = dir
     data_path = dir + "/data"
     @js_path = data_path + "/js"
     @csv_path = data_path + "/csv"
     @key_path = key_dir
 
+    @write_csv = write_csv
     @verbose = verbose
     @prune = prune
     @access_token = nil
@@ -96,6 +97,7 @@ class GrailbirdUpdater
 
       # overwrite existing file (or create new if doesn't exist)
       GrailbirdUpdater::JsFile.write_with_heading(all_month_tweets, "#{@js_path}/tweets/#{year_month}.js", "Grailbird.data.tweets_#{year_month}")
+      write_csv_month_tweets(all_month_tweets, "#{@csv_path}/#{year_month}.csv") if @write_csv
       tweet_index = update_tweet_index(tweet_index, year_month, month_tweets.length)
     end
 
@@ -244,6 +246,31 @@ EOS
     return access_token
   end
 
+  def write_csv_month_tweets (tweets, csv_path)
+    CSV.open(csv_path, "w") do |csv|
+      csv << ["tweet_id", "in_reply_to_status_id", "in_reply_to_user_id", "retweeted_status_id", "retweeted_status_user_id", "timestamp", "source", "text", "expanded_urls"]
+      tweets.each do |tweet|
+        csv << get_csv_tweet_array(tweet)
+      end
+    end
+  end
+
+  def get_csv_tweet_array (tweet)
+    csv_tweet_array = [tweet["id"],
+                       tweet["in_reply_to_status_id"],
+                       tweet["in_reply_to_user_id"],
+                       tweet.has_key?("retweeted_status") ? tweet["retweeted_status"]["id"] : '',
+                       tweet["created_at"],
+                       tweet["source"],
+                       tweet["text"]];
+    if tweet.has_key?("entities") && tweet["entities"].has_key?("urls")
+        tweet["entities"]["urls"].each do |url|
+            csv_tweet_array << url["expanded_url"]
+        end
+    end
+    return csv_tweet_array
+  end
+
   def prune_tweet(tweet)
     KEEP_FIELDS.each do |parent_field, field_names|
       tweet[parent_field].delete_if { |key, value| !field_names.include?(key) }
@@ -273,7 +300,7 @@ EOS
     end
 
     new_month = {"file_name" => "data/js/tweets/#{year_month}.js",
-      "year" => year,
+        "year" => year,
         "var_name" => "tweets_#{year_month}",
         "tweet_count" => count,
         "month" => month

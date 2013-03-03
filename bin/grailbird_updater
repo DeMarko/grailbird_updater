@@ -3,9 +3,10 @@
 require 'uri'
 require 'net/http'
 require 'json'
+require 'csv'
 require 'oauth'
 require 'trollop'
-require 'colorize' # if verbose
+require 'colorize'
 
 require 'grailbird_updater'
 
@@ -21,6 +22,7 @@ EOS
 
     opt :verbose, "Verbose mode"
     opt :prune, "Prune all but necessary user data from tweets", :default => true
+    opt :csv_write, "Also write to CSV files in archive", :default => false
     opt :directory, "Twitter archive directory", :type => :string
     opt :key_path, "Alternate path to directory containing a YAML file with the app/user keys for the archive's account. Defaults to the archive directory", :type => :string
 end
@@ -38,4 +40,4 @@ raise ArgumentError, "#{key_path} is not a directory" unless File.directory?(key
 raise IOError, "#{key_path} is not readable" unless File.readable?(key_path)
 raise IOError, "#{key_path} is not writable" unless File.writable?(key_path)
 
-GrailbirdUpdater.new(dir, opts[:verbose], opts[:prune], key_path).update_tweets
+GrailbirdUpdater.new(dir, opts[:verbose], opts[:prune], key_path, opts[:csv_write]).update_tweets
