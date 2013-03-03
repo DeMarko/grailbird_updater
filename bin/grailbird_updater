@@ -4,7 +4,6 @@ require 'uri'
 require 'net/http'
 require 'json'
 require 'oauth'
-require 'pp'
 require 'trollop'
 require 'colorize' # if verbose
 
@@ -17,10 +16,13 @@ Update your Twitter archive (best if used with a cron)
 
 Usage: updater [options] [path to archive]
 
+Where [options] can be:
 EOS
+
     opt :verbose, "Verbose mode"
     opt :prune, "Prune all but necessary user data from tweets", :default => true
     opt :directory, "Twitter archive directory", :type => :string
+    opt :key_path, "Alternate path to directory containing a YAML file with the app/user keys for the archive's account. Defaults to the archive directory", :type => :string
 end
 
 dir = nil
@@ -29,4 +31,11 @@ dir ||= ARGV.first
 dir ||= "."
 raise ArgumentError, "Must specify a directory" unless File.directory?(dir)
 
-GrailbirdUpdater.new(dir, opts[:verbose], opts[:prune]).update_tweets
+key_path = opts[:key_path]
+key_path ||= dir
+
+raise ArgumentError, "#{key_path} is not a directory" unless File.directory?(key_path)
+raise IOError, "#{key_path} is not readable" unless File.readable?(key_path)
+raise IOError, "#{key_path} is not writable" unless File.writable?(key_path)
+
+GrailbirdUpdater.new(dir, opts[:verbose], opts[:prune], key_path).update_tweets

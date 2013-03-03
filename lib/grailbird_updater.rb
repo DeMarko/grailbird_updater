@@ -35,11 +35,12 @@ class GrailbirdUpdater
     end
   end
 
-  def initialize(dir, verbose, prune)
+  def initialize(dir, verbose, prune, key_dir)
     @base_dir = dir
     data_path = dir + "/data"
     @js_path = data_path + "/js"
     @csv_path = data_path + "/csv"
+    @key_path = key_dir
 
     @verbose = verbose
     @prune = prune
@@ -107,7 +108,7 @@ class GrailbirdUpdater
   end
 
   def get_twitter_user_timeline_response(screen_name, user_id, last_tweet_id)
-    twitter_url = "http://api.twitter.com/1/statuses/user_timeline.json"
+    twitter_url = "http://api.twitter.com/1.1/statuses/user_timeline.json"
     twitter_uri = URI(twitter_url)
 
     params = {
@@ -143,17 +144,13 @@ class GrailbirdUpdater
     if !@access_token.nil?
       response = @access_token.request(:get, twitter_uri.to_s)
     else
-      response = Net::HTTP.get_response(twitter_uri)
-
-      if response.is_a?(Net::HTTPUnauthorized)
-        @access_token = do_oauth_dance(screen_name)
-        response = @access_token.request(:get, twitter_uri.to_s)
-      end
+      @access_token = do_oauth_dance(screen_name)
+      response = @access_token.request(:get, twitter_uri.to_s)
     end
 
     if response.is_a?(Net::HTTPUnauthorized)
       puts "\nSomething went wrong trying to authorize grailbird_updater with the account: " + "@#{screen_name}".blue
-      puts "Please delete #{@base_dir}/#{screen_name}_keys.yaml and follow the authorize steps again."
+      puts "Please delete #{@key_path}/#{screen_name}_keys.yaml and follow the authorize steps again."
       exit
     end
 
@@ -161,8 +158,8 @@ class GrailbirdUpdater
   end
 
   def do_oauth_dance(screen_name)
-    puts "\nIt seems " + "@#{screen_name}".blue + " has a protected account."
-    key_file_path = "#{@base_dir}/#{screen_name}_keys.yaml"
+    key_file_path = "#{@key_path}/#{screen_name}_keys.yaml"
+
     if File.exists?(key_file_path)
         keys = YAML.load_file(key_file_path)
         consumer_key = keys['consumer_key']
@@ -171,25 +168,30 @@ class GrailbirdUpdater
         token_secret = keys['secret']
     else
       puts <<-EOS
-      To be able to retrieve your protected tweets, you will need a consumer key/secret
+\nTo be able to retrieve your protected tweets, you will need a consumer key/secret
 
-      Please follow these steps to authorize grailbird_updater to download tweets:
-          1. Go to https://dev.twitter.com/apps/new
-          2. Give it a name (I recommend #{screen_name}_grailbird), description and URL
-          3. Create application
-          4. Go to your application page, you should see a "Consumer key" and a "Consumer secret"
+Please follow these steps to authorize grailbird_updater to download tweets:
+    1. Go to https://dev.twitter.com/apps/new
+    2. Give it a name (I recommend #{screen_name}_grailbird), description and URL
+    3. Create application
+    4. Go to your application page, you should see a "Consumer key" and a "Consumer secret"
 
-      Note: you will only need to create this application once!
+#{"Note".underline}: you will only need to create this application once!
 
-      So you don't have to enter these again, we'll save a copy of your keys in a file called #{screen_name}_keys.yaml
+So you don't have to enter these again, we'll save a copy of your keys to:
+    #{key_file_path}
 
-      #{"IMPORTANT".red.blink} Do NOT store the folder of your tweets on a public server.
-                If someone gets access to #{screen_name}_keys.yaml they can access your entire account!
-      EOS
+You can always change the directory these are saved to by using the -k or --key-path option
 
-      puts "\nEnter your 'Consumer key'"
+#{"WARNING".red.underline} Do NOT store the folder of your tweets on a public server.
+    If someone gets access to #{screen_name}_keys.yaml they can access your entire account!
+    If you want to share your archived tweets, either control the read access to the key file
+    OR use the --key-path option to store them somewhere else.
+EOS
+
+      print_flush "\nEnter your 'Consumer key': "
       consumer_key = STDIN.gets.chomp
-      puts "Enter your 'Consumer secret'"
+      print_flush "Enter your 'Consumer secret': "
       consumer_secret = STDIN.gets.chomp
       consumer = OAuth::Consumer.new(
         consumer_key,
@@ -200,9 +202,10 @@ class GrailbirdUpdater
           :authorize_path => '/oauth/authorize' }
       )
       request_token = consumer.get_request_token
-      puts "\nGo to this URL: #{request_token.authorize_url()}"
+      authorize_url = request_token.authorize_url()
+      puts "\nGo to this URL: #{authorize_url}"
       puts "Authorize the application and you will receive a PIN"
-      puts "Enter the PIN here:"
+      print_flush "Enter the PIN here: "
       pin = STDIN.gets.chomp
       access_token = request_token.get_access_token(:oauth_verifier => pin)
 
@@ -275,6 +278,11 @@ class GrailbirdUpdater
   # only puts if we're verbose
   def vputs(str)
     puts str if @verbose
+  end
+
+  def print_flush(str)
+    print str
+    $stdout.flush
   end
 end
 
