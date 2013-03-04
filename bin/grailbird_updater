@@ -2,6 +2,7 @@
 
 require 'uri'
 require 'net/http'
+require 'yaml'
 require 'json'
 require 'csv'
 require 'oauth'
