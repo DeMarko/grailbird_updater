@@ -290,13 +290,14 @@ EOS
   end
 
   def display_tweet(tweet)
+    tweet = tweet["retweeted_status"] if tweet.has_key?("retweeted_status")
     tweet_text = tweet['text']
     if tweet['entities'] && tweet['entities']['urls']
       tweet['entities']['urls'].each { |url_entity|
         tweet_text = tweet['text'].gsub("#{url_entity['url']}", "#{url_entity['expanded_url']}")
       }
     end
-    tweet = "@#{tweet['user']['screen_name']}".blue + ": \"#{tweet_text}\"\n"
+    tweet = "@#{tweet['user']['screen_name']}".blue + ": #{tweet_text}\n"
   end
 
   def update_tweet_index(tweet_index, year_month, count)
