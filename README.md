@@ -41,23 +41,23 @@ grailbird_updater /path/to/twitter/archive
 
 * _I have a protected Twitter account, can I still use this updater with my Twitter archive?_
 
-    Actually, yes! However, you will need to create your own "application" on
+    Actually, yes! Like with any account, as of v0.5.0, you will need to create your own "application" on
     Twitter and then use your own consumer key/secret pair to let the application
     use the oauth tokens for a user and then follow the authorization steps for
-    a given protected user.
+    a given user.
 
-    Once you have auth'd the application for a protected user, you do not have to do
+    Once you have auth'd the application for a user, you do not have to do
     it again, the consumer key/secret and oauth token/secret are stored in a YAML file
-    at the root of your tweet archive.
+    at the root of your tweet archive (or a user specified locationo, if the --key_path flag is used).
 
     __IMPORTANT__ Do NOT commit or post your own consumer key/secret or your oauth
     token/secret anywhere.
 
     Note: you will only need to create a single application on Twitter even if you
-    are using this to update multiple protected account. You can reuse the consumer
+    are using this to update multiple accounts. You can reuse the consumer
     key/secret and just authorize each account individually.
 
-    Please see [this wiki article](https://github.com/DeMarko/grailbird_updater/wiki/Authorizing-grailbird_updater-to-work-with-Protected-Twitter-accounts) for step-by-step instructions.
+    Please see [this wiki article](https://github.com/DeMarko/grailbird_updater/wiki/Authorizing-grailbird_updater) for step-by-step instructions.
 
 * _How do I know if I have a Twitter archive?_
 
