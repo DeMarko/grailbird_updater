@@ -29,10 +29,10 @@ And then execute:
 grailbird_updater /path/to/twitter/archive
 ```
 
-To run as a cronjob, with the gem installed using rvm (at `~/grailbird` in this example)
+To run as a cronjob, with the gem installed using rvm (at `/home/username/grailbird` in this example)
 
 ```
-@daily /bin/bash -l -c 'cd /home/dustmop/grailbird && grailbird_updater /path/to/twitter/archive'
+@daily /bin/bash -l -c 'cd /home/username/grailbird && grailbird_updater /path/to/twitter/archive'
 ```
 
 ## Contributing
