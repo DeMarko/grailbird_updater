@@ -78,23 +78,15 @@ To run as a cronjob, with the gem installed using rvm (at `/home/username/grailb
     the way to the bottom. If the feature is enabled for you, you should see
     a section labeled "Your Twitter Archive".
 
-    The file structure looks somewhat like this (as of 19.12.12):
+    The file structure looks somewhat like this (as of 09.04.13):
 
 
 ```
 tweets
 ├── README.txt
 ├── css
-│   └─ ... // provided by Twitter
+│   └─ application.min.css
 ├── data
-│   ├── csv
-│   │   ├── 2007_03.csv
-│   │   ├── 2007_04.csv
-│   │   ├── 2007_05.csv
-│   │   ├─ ...
-│   │   ├── 2012_10.csv
-│   │   ├── 2012_11.csv
-│   │   └── 2012_12.csv
 │   └── js
 │       ├── payload_details.js
 │       ├── tweet_index.js
@@ -103,16 +95,18 @@ tweets
 │       │   ├── 2007_04.js
 │       │   ├── 2007_05.js
 │       │   ├─ ... // you get the idea, I've been on Twitter a while
-│       │   ├── 2012_10.js
-│       │   ├── 2012_11.js
-│       │   └── 2012_12.js
+│       │   ├── 2013_02.js
+│       │   ├── 2013_03.js
+│       │   └── 2013_04.js
 │       └── user_details.js
 ├── img
 │   └─ ... // provided by Twitter
 ├── index.html
 ├── js
 │   └─ ... // provided by Twitter
-└── lib
-    └─ ... // provided by Twitter
+├── lib
+│   └─ ... // provided by Twitter
+├── README.txt
+└── tweets.csv
 ```
 
