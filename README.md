@@ -54,7 +54,7 @@ To run as a cronjob, with the gem installed using rvm (at `/home/username/grailb
 
     Once you have auth'd the application for a user, you do not have to do
     it again, the consumer key/secret and oauth token/secret are stored in a YAML file
-    at the root of your tweet archive (or a user specified locationo, if the --key_path flag is used).
+    at the root of your tweet archive (or a user specified locationo, if the --key-path flag is used).
 
     __IMPORTANT__ Do NOT commit or post your own consumer key/secret or your oauth
     token/secret anywhere.
