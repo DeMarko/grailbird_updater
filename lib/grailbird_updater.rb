@@ -147,7 +147,7 @@ class GrailbirdUpdater
   end
 
   def get_twitter_user_timeline_response(screen_name, user_id, last_tweet_id)
-    twitter_url = "http://api.twitter.com/1.1/statuses/user_timeline.json"
+    twitter_url = "https://api.twitter.com/1.1/statuses/user_timeline.json"
     twitter_uri = URI(twitter_url)
 
     params = {
@@ -236,7 +236,7 @@ EOS
       consumer = OAuth::Consumer.new(
         consumer_key,
         consumer_secret,
-        { :site => 'http://api.twitter.com/',
+        { :site => 'https://api.twitter.com/',
           :request_token_path => '/oauth/request_token',
           :access_token_path => '/oauth/access_token',
           :authorize_path => '/oauth/authorize' }
@@ -271,7 +271,7 @@ EOS
 
   def prepare_access_token(consumer_key, consumer_secret, oauth_token, oauth_token_secret)
     consumer = OAuth::Consumer.new(consumer_key, consumer_secret,
-      { :site => "http://api.twitter.com",
+      { :site => "https://api.twitter.com",
         :scheme => :header
       })
     # now create the access token object from passed values
