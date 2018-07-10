@@ -210,7 +210,7 @@ class GrailbirdUpdater
 \nTo be able to retrieve your protected tweets, you will need a consumer key/secret
 
 Please follow these steps to authorize grailbird_updater to download tweets:
-    1. Go to https://dev.twitter.com/apps/new
+    1. Go to https://apps.twitter.com/apps/new
     2. Give it a name (I recommend #{screen_name}_grailbird), description and URL
     3. Create application
     4. Go to your application page, you should see a "Consumer key" and a "Consumer secret"
