@@ -6,6 +6,7 @@ require 'grailbird_updater/version'
 Gem::Specification.new do |gem|
   gem.name          = "grailbird_updater"
   gem.version       = GrailbirdUpdater::VERSION
+  gem.license       = "MIT"
   gem.authors       = ["Dannel Jurado"]
   gem.email         = ["dannelj@gmail.com"]
   gem.description   = %q{Twitter now allows you to download your tweets. This tool lets you keep that archive up to date.}
@@ -17,7 +18,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.add_dependency "oauth"
-  gem.add_dependency "trollop"
-  gem.add_dependency "colorize"
+  gem.add_dependency "oauth", "~> 0.5"
+  gem.add_dependency "optimist", "~> 3.0"
+  gem.add_dependency "colorize", "~> 0.8"
 end

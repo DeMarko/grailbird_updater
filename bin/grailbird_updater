@@ -6,12 +6,12 @@ require 'yaml'
 require 'json'
 require 'csv'
 require 'oauth'
-require 'trollop'
+require 'optimist'
 require 'colorize'
 
 require 'grailbird_updater'
 
-opts = Trollop::options do
+opts = Optimist::options do
     version "updater #{GrailbirdUpdater::VERSION}"
     banner <<-EOS
 Update your Twitter archive (best if used with a cron)
